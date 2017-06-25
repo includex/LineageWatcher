@@ -35,8 +35,7 @@ class ImageTransmogrifier internal constructor(private val svc: WatcherService) 
         this.width = width
         this.height = height
 
-        imageReader = ImageReader.newInstance(width, height,
-                PixelFormat.RGBA_8888, 2)
+        imageReader = ImageReader.newInstance(width, height, PixelFormat.RGBA_8888, 2)
         imageReader.setOnImageAvailableListener(this, svc.getHandler())
     }
 

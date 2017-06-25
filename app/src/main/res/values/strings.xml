@@ -3,4 +3,6 @@
     <string name="display_overlay_ui">UI 표시</string>
     <string name="hide_overlay_ui">UI종료</string>
     <string name="start">start</string>
+    <string name="vibrator_with_kill_app">진동(5초) + 앱 종료</string>
+    <string name="vibrator">진동(5초)</string>
 </resources>

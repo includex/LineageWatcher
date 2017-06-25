@@ -10,22 +10,15 @@ import android.widget.TextView
 import lineagewatcher.toda.com.lineagewatcher.R
 import lineagewatcher.toda.com.lineagewatcher.databinding.ActivityMainBinding
 import lineagewatcher.toda.com.lineagewatcher.service.WatcherService
-import android.content.Context.MEDIA_PROJECTION_SERVICE
-import android.media.projection.MediaProjection
 import android.media.projection.MediaProjectionManager
-
+import lineagewatcher.toda.com.lineagewatcher.singleton.Const
 
 class MainActivity : AppCompatActivity() {
 
     private var binding: ActivityMainBinding? = null
     private var self: MainActivity? = null
-    private var runningService: Boolean = false;
     private val REQUEST_CODE_CAPTURE_PREMISSION_REQUEST = 1000
-
-
-    companion object {
-        public var mediaProjection: MediaProjection? = null
-    }
+    private var projectionManager: MediaProjectionManager? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,21 +26,24 @@ class MainActivity : AppCompatActivity() {
         self = this
 
         binding = DataBindingUtil.setContentView<ActivityMainBinding>(this, R.layout.activity_main);
-        (binding?.tvControlButton as TextView).setOnClickListener({
-            if (runningService) {
+        (binding?.tvControlButton as? TextView)?.setOnClickListener({
+            if (Const.runningService) {
                 stopService(Intent(self, WatcherService::class.java))
             } else {
                 startService(Intent(self, WatcherService::class.java))
             }
 
-            runningService = !runningService;
+            Const.runningService = !Const.runningService;
             updateUI();
         })
 
-        init();
-    }
+        (binding?.tvSwitchKillApp as? TextView)?.setOnClickListener({
+            Const.appKill = !Const.appKill
+            updateUI();
+        })
 
-    private var projectionManager: MediaProjectionManager? = null
+        init()
+    }
 
     private fun init() {
         projectionManager = getSystemService(Context.MEDIA_PROJECTION_SERVICE) as? MediaProjectionManager
@@ -55,7 +51,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateUI() {
-        (binding?.tvControlButton as TextView).setText(if (runningService) R.string.hide_overlay_ui else R.string.display_overlay_ui)
+        (binding?.tvControlButton as TextView).setText(if (Const.runningService) R.string.hide_overlay_ui else R.string.display_overlay_ui)
+        (binding?.tvSwitchKillApp as TextView).setText(if (Const.appKill) R.string.vibrator_with_kill_app else R.string.vibrator)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -67,9 +64,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         if (requestCode == REQUEST_CODE_CAPTURE_PREMISSION_REQUEST) {
-            mediaProjection = projectionManager?.getMediaProjection(resultCode, data);
+            Const.mediaProjection = projectionManager?.getMediaProjection(resultCode, data);
         }
 
     }
-
 }
