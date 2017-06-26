@@ -11,6 +11,9 @@ import lineagewatcher.toda.com.lineagewatcher.R
 import lineagewatcher.toda.com.lineagewatcher.databinding.ActivityMainBinding
 import lineagewatcher.toda.com.lineagewatcher.service.WatcherService
 import android.media.projection.MediaProjectionManager
+import android.net.Uri
+import android.os.Build
+import android.provider.Settings
 import lineagewatcher.toda.com.lineagewatcher.singleton.Const
 
 class MainActivity : AppCompatActivity() {
@@ -18,6 +21,7 @@ class MainActivity : AppCompatActivity() {
     private var binding: ActivityMainBinding? = null
     private var self: MainActivity? = null
     private val REQUEST_CODE_CAPTURE_PREMISSION_REQUEST = 1000
+    private val REQUEST_CODE_OVERLAY_PREMISSION_REQUEST = 1001
     private var projectionManager: MediaProjectionManager? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,9 +49,18 @@ class MainActivity : AppCompatActivity() {
         init()
     }
 
+
     private fun init() {
         projectionManager = getSystemService(Context.MEDIA_PROJECTION_SERVICE) as? MediaProjectionManager
         startActivityForResult(projectionManager?.createScreenCaptureIntent(), REQUEST_CODE_CAPTURE_PREMISSION_REQUEST)
+
+        if (!Settings.canDrawOverlays(this)) {
+            val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + packageName))
+            startActivityForResult(intent, REQUEST_CODE_OVERLAY_PREMISSION_REQUEST)
+        }
+
+        startActivityForResult(projectionManager?.createScreenCaptureIntent(), REQUEST_CODE_CAPTURE_PREMISSION_REQUEST)
+
     }
 
     private fun updateUI() {
@@ -58,7 +71,7 @@ class MainActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        if (requestCode == REQUEST_CODE_CAPTURE_PREMISSION_REQUEST && resultCode == Activity.RESULT_CANCELED) {
+        if (resultCode == Activity.RESULT_CANCELED) {
             finish();
             return;
         }
@@ -66,6 +79,5 @@ class MainActivity : AppCompatActivity() {
         if (requestCode == REQUEST_CODE_CAPTURE_PREMISSION_REQUEST) {
             Const.mediaProjection = projectionManager?.getMediaProjection(resultCode, data);
         }
-
     }
 }
