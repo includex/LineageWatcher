@@ -194,7 +194,9 @@ class WatcherService : Service() {
                 watching = false;
 
                 if (Const.appKill) {
-                    startActivity(Intent(this, AlarmActivity::class.java))
+                    val intent = Intent(this, AlarmActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    startActivity(intent)
                 }
             }
         })
