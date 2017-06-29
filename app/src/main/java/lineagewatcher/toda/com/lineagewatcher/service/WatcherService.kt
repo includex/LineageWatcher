@@ -4,24 +4,24 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
-import android.view.View
-import android.view.WindowManager
 import android.graphics.PixelFormat
 import android.graphics.Rect
 import android.hardware.display.VirtualDisplay
 import android.media.projection.MediaProjection
 import android.util.DisplayMetrics
-import android.view.LayoutInflater
-import android.view.MotionEvent
 import lineagewatcher.toda.com.lineagewatcher.R
 import lineagewatcher.toda.com.lineagewatcher.utils.ImageTransmogrifier
 import android.hardware.display.DisplayManager
 import android.os.*
 import android.content.pm.ApplicationInfo
 import android.app.ActivityManager
+import android.content.pm.ConfigurationInfo
 import android.content.pm.PackageManager
+import android.content.res.Configuration
+import android.util.Log
+import android.view.*
 import lineagewatcher.toda.com.lineagewatcher.activity.AlarmActivity
-import lineagewatcher.toda.com.lineagewatcher.singleton.Const
+import lineagewatcher.toda.com.lineagewatcher.singleton.Config
 
 class WatcherService : Service() {
     private var windowManager: WindowManager? = null;
@@ -40,10 +40,11 @@ class WatcherService : Service() {
     private val DISPLAY_NAME: String = "capture"
     private val handlerThread = HandlerThread(javaClass.simpleName, android.os.Process.THREAD_PRIORITY_BACKGROUND)
     private var handler: Handler? = null
-    private var scaleX: Float = 0f
-    private var scaleY: Float = 0f
+    //private var scaleX: Float = 0f
+    //private var scaleY: Float = 0f
     private var color: Int? = null
-    private var vibrator: Vibrator? = null;
+    private var vibrator: Vibrator? = null
+    private var defaultDisplay: Display? = null
 
     private var params: WindowManager.LayoutParams = WindowManager.LayoutParams(
             WindowManager.LayoutParams.TYPE_PHONE,
@@ -54,8 +55,11 @@ class WatcherService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+
         windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
-        windowManager?.defaultDisplay?.getMetrics(metrics)
+        defaultDisplay = windowManager?.defaultDisplay;
+        defaultDisplay?.getMetrics(metrics)
+
         installView()
 
         handlerThread.start();
@@ -64,8 +68,8 @@ class WatcherService : Service() {
         vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
     }
 
-    private fun toggle() {
-        watching = !watching;
+    private fun updateUI(watching: Boolean) {
+        this.watching = watching
         ivMover?.visibility = if (watching) View.GONE else View.VISIBLE
         roundButton?.setBackgroundResource(if (watching) R.drawable.control_ui_round_watching else R.drawable.control_ui_round)
     }
@@ -76,22 +80,24 @@ class WatcherService : Service() {
         ivMover = uiView?.findViewById(R.id.iv_mover)
 
         roundButton?.setOnClickListener({
-            imageTransmogrifier = ImageTransmogrifier(this);
-
-            toggle();
+            updateUI(!watching);
 
             if (watching == true) {
                 color = null;
-                if (virtualDisplay == null) {
-                    virtualDisplay = Const.mediaProjection?.createVirtualDisplay(DISPLAY_NAME,
-                            imageTransmogrifier?.getWidth()!!, imageTransmogrifier?.getHeight()!!,
-                            getResources().getDisplayMetrics().densityDpi,
-                            DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY or DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC, imageTransmogrifier?.surface, null, handler);
 
-                    scaleY = metrics.heightPixels.toFloat() / imageTransmogrifier?.getHeight()!!.toFloat()
-                    scaleX = metrics.widthPixels.toFloat() / imageTransmogrifier?.getWidth()!!.toFloat()
-                    Const.mediaProjection?.registerCallback(CallBack(virtualDisplay), handler)
+                if (virtualDisplay != null) {
+                    virtualDisplay?.release();
+                    virtualDisplay = null;
                 }
+
+                imageTransmogrifier = ImageTransmogrifier(this);
+                virtualDisplay = Config.mediaProjection?.createVirtualDisplay(DISPLAY_NAME,
+                        imageTransmogrifier?.getWidth()!!, imageTransmogrifier?.getHeight()!!,
+                        getResources().getDisplayMetrics().densityDpi,
+                        DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY or DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC, imageTransmogrifier?.surface, null, handler);
+
+                Config.mediaProjection?.registerCallback(CallBack(virtualDisplay), handler)
+
             }
         })
         bindDragEvent(uiView)
@@ -147,6 +153,11 @@ class WatcherService : Service() {
     override fun onDestroy() {
         super.onDestroy()
 
+        if (virtualDisplay != null) {
+            virtualDisplay?.release()
+            virtualDisplay = null
+        }
+
         if (uiView != null) {
             windowManager?.removeView(uiView)
         }
@@ -184,19 +195,24 @@ class WatcherService : Service() {
         }
 
         Handler(Looper.getMainLooper()).post({
-            val currentColor = bitmap?.getPixel((currentX / scaleX + (10 * metrics.density) / 2).toInt(), (currentY / scaleY + (10 * metrics.density) / 2).toInt());
-            if (color == null) {
-                color = currentColor
-            } else if (currentColor != color) {
-                vibrator?.vibrate(5000)
+            var x: Int? = null
+            var y: Int? = null
 
-                toggle();
-                watching = false;
+            if (imageTransmogrifier?.orientation != getResources().getConfiguration().orientation) {
+                updateUI(false);
+            } else {
+                val currentColor = bitmap?.getPixel((currentX / imageTransmogrifier?.scaleX!!).toInt(), (currentY / imageTransmogrifier?.scaleY!!).toInt());
+                if (color == null) {
+                    color = currentColor
+                } else if (currentColor != color) {
+                    vibrator?.vibrate(5000)
+                    updateUI(false);
 
-                if (Const.appKill) {
-                    val intent = Intent(this, AlarmActivity::class.java)
-                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                    startActivity(intent)
+                    if (Config.appKill) {
+                        val intent = Intent(this, AlarmActivity::class.java)
+                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                        startActivity(intent)
+                    }
                 }
             }
         })

@@ -16,6 +16,9 @@ class ImageTransmogrifier internal constructor(private val svc: WatcherService) 
     private val height: Int
     private val imageReader: ImageReader
     private var latestBitmap: Bitmap? = null
+    public var orientation: Int
+    public var scaleX: Float
+    public var scaleY: Float
 
     init {
 
@@ -34,6 +37,10 @@ class ImageTransmogrifier internal constructor(private val svc: WatcherService) 
 
         this.width = width
         this.height = height
+        this.scaleX = size.x / width.toFloat()
+        this.scaleY = size.y / height.toFloat()
+
+        this.orientation = svc.resources.configuration.orientation;
 
         imageReader = ImageReader.newInstance(width, height, PixelFormat.RGBA_8888, 2)
         imageReader.setOnImageAvailableListener(this, svc.getHandler())

@@ -12,14 +12,13 @@ import lineagewatcher.toda.com.lineagewatcher.databinding.ActivityMainBinding
 import lineagewatcher.toda.com.lineagewatcher.service.WatcherService
 import android.media.projection.MediaProjectionManager
 import android.net.Uri
-import android.os.Build
 import android.provider.Settings
-import lineagewatcher.toda.com.lineagewatcher.singleton.Const
+import android.widget.Toast
+import lineagewatcher.toda.com.lineagewatcher.singleton.Config
 
 class MainActivity : AppCompatActivity() {
 
     private var binding: ActivityMainBinding? = null
-    private var self: MainActivity? = null
     private val REQUEST_CODE_CAPTURE_PREMISSION_REQUEST = 1000
     private val REQUEST_CODE_OVERLAY_PREMISSION_REQUEST = 1001
     private var projectionManager: MediaProjectionManager? = null
@@ -27,45 +26,46 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        self = this
-
         binding = DataBindingUtil.setContentView<ActivityMainBinding>(this, R.layout.activity_main);
         (binding?.tvControlButton as? TextView)?.setOnClickListener({
-            if (Const.runningService) {
-                stopService(Intent(self, WatcherService::class.java))
+            if (Config.runningService) {
+                stopService(Intent(this@MainActivity, WatcherService::class.java))
             } else {
-                startService(Intent(self, WatcherService::class.java))
+                init()
+                startService(Intent(this@MainActivity, WatcherService::class.java))
             }
 
-            Const.runningService = !Const.runningService;
+            Config.runningService = !Config.runningService;
             updateUI();
         })
 
         (binding?.tvSwitchKillApp as? TextView)?.setOnClickListener({
-            Const.appKill = !Const.appKill
+            Config.appKill = !Config.appKill
             updateUI();
         })
-
-        init()
     }
 
+    override fun onResume() {
+        super.onResume()
+        updateUI()
+    }
 
     private fun init() {
-        projectionManager = getSystemService(Context.MEDIA_PROJECTION_SERVICE) as? MediaProjectionManager
-        startActivityForResult(projectionManager?.createScreenCaptureIntent(), REQUEST_CODE_CAPTURE_PREMISSION_REQUEST)
 
         if (!Settings.canDrawOverlays(this)) {
             val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + packageName))
             startActivityForResult(intent, REQUEST_CODE_OVERLAY_PREMISSION_REQUEST)
         }
 
-        startActivityForResult(projectionManager?.createScreenCaptureIntent(), REQUEST_CODE_CAPTURE_PREMISSION_REQUEST)
-
+        if (projectionManager == null) {
+            projectionManager = getSystemService(Context.MEDIA_PROJECTION_SERVICE) as? MediaProjectionManager
+            startActivityForResult(projectionManager?.createScreenCaptureIntent(), REQUEST_CODE_CAPTURE_PREMISSION_REQUEST)
+        }
     }
 
     private fun updateUI() {
-        (binding?.tvControlButton as TextView).setText(if (Const.runningService) R.string.hide_overlay_ui else R.string.display_overlay_ui)
-        (binding?.tvSwitchKillApp as TextView).setText(if (Const.appKill) R.string.vibrator_with_kill_app else R.string.vibrator)
+        (binding?.tvControlButton as TextView).setText(if (Config.runningService) R.string.hide_overlay_ui else R.string.display_overlay_ui)
+        (binding?.tvSwitchKillApp as TextView).setText(if (Config.appKill) R.string.vibrator_with_kill_app else R.string.vibrator)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -77,7 +77,13 @@ class MainActivity : AppCompatActivity() {
         }
 
         if (requestCode == REQUEST_CODE_CAPTURE_PREMISSION_REQUEST) {
-            Const.mediaProjection = projectionManager?.getMediaProjection(resultCode, data);
+            Config.mediaProjection = projectionManager?.getMediaProjection(resultCode, data);
+            try {
+                startActivity(packageManager.getLaunchIntentForPackage(Config.LINEAGE_PACKAGE_NAME))
+            } catch(e: Exception) {
+                Toast.makeText(this, R.string.toast_for_not_found_lineage, Toast.LENGTH_SHORT).show();
+            }
         }
+
     }
 }
