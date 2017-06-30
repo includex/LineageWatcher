@@ -1,10 +1,10 @@
-package lineagewatcher.toda.com.lineagewatcher.activity
+package com.stolineage.lineagewatcher.activity
 
 import android.app.ActivityManager
 import android.content.Context
 import android.os.Handler
 import android.support.v7.app.AppCompatActivity
-import lineagewatcher.toda.com.lineagewatcher.singleton.Config
+import com.stolineage.lineagewatcher.singleton.Config
 
 class AlarmActivity : AppCompatActivity() {
     override fun onResume() {

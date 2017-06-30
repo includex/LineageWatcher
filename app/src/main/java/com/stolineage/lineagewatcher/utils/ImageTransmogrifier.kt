@@ -1,4 +1,4 @@
-package lineagewatcher.toda.com.lineagewatcher.utils
+package com.stolineage.lineagewatcher.utils
 
 import android.graphics.Bitmap
 import android.graphics.PixelFormat
@@ -7,7 +7,7 @@ import android.media.Image
 import android.media.ImageReader
 import android.view.Display
 import android.view.Surface
-import lineagewatcher.toda.com.lineagewatcher.service.WatcherService
+import com.stolineage.lineagewatcher.service.WatcherService
 import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
 

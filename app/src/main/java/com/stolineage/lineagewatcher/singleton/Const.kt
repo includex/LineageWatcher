@@ -1,4 +1,4 @@
-package lineagewatcher.toda.com.lineagewatcher.singleton
+package com.stolineage.lineagewatcher.singleton
 
 import android.media.projection.MediaProjection
 

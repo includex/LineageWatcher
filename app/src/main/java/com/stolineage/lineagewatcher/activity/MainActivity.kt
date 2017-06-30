@@ -1,4 +1,4 @@
-package lineagewatcher.toda.com.lineagewatcher.activity
+package com.stolineage.lineagewatcher.activity
 
 import android.app.Activity
 import android.content.Context
@@ -7,14 +7,14 @@ import android.databinding.DataBindingUtil
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.TextView
-import lineagewatcher.toda.com.lineagewatcher.R
-import lineagewatcher.toda.com.lineagewatcher.databinding.ActivityMainBinding
-import lineagewatcher.toda.com.lineagewatcher.service.WatcherService
+import com.stolineage.lineagewatcher.R
+import com.stolineage.lineagewatcher.databinding.ActivityMainBinding
+import com.stolineage.lineagewatcher.service.WatcherService
 import android.media.projection.MediaProjectionManager
 import android.net.Uri
 import android.provider.Settings
 import android.widget.Toast
-import lineagewatcher.toda.com.lineagewatcher.singleton.Config
+import com.stolineage.lineagewatcher.singleton.Config
 
 class MainActivity : AppCompatActivity() {
 

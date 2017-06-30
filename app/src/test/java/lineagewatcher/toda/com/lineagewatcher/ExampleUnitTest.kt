@@ -1,4 +1,4 @@
-package lineagewatcher.toda.com.lineagewatcher
+package com.stolineage.lineagewatcher
 
 import org.junit.Test
 

@@ -1,4 +1,4 @@
-package lineagewatcher.toda.com.lineagewatcher.service
+package com.stolineage.lineagewatcher.service
 
 import android.app.Service
 import android.content.Context
@@ -9,8 +9,8 @@ import android.graphics.Rect
 import android.hardware.display.VirtualDisplay
 import android.media.projection.MediaProjection
 import android.util.DisplayMetrics
-import lineagewatcher.toda.com.lineagewatcher.R
-import lineagewatcher.toda.com.lineagewatcher.utils.ImageTransmogrifier
+import com.stolineage.lineagewatcher.R
+import com.stolineage.lineagewatcher.utils.ImageTransmogrifier
 import android.hardware.display.DisplayManager
 import android.os.*
 import android.content.pm.ApplicationInfo
@@ -20,8 +20,8 @@ import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.util.Log
 import android.view.*
-import lineagewatcher.toda.com.lineagewatcher.activity.AlarmActivity
-import lineagewatcher.toda.com.lineagewatcher.singleton.Config
+import com.stolineage.lineagewatcher.activity.AlarmActivity
+import com.stolineage.lineagewatcher.singleton.Config
 
 class WatcherService : Service() {
     private var windowManager: WindowManager? = null;

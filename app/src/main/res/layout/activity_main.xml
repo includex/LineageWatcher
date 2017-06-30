@@ -13,7 +13,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:paddingTop="20dp"
-            tools:context="lineagewatcher.toda.com.lineagewatcher.activity.MainActivity">
+            tools:context="com.stolineage.lineagewatcher.activity.MainActivity">
 
             <TextView
                 android:layout_width="match_parent"
@@ -64,13 +64,21 @@
                     android:textStyle="bold" />
             </LinearLayout>
 
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:paddingTop="20dp"
+                android:text="@string/copyright"
+                android:textSize="12sp" />
+
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:layout_marginBottom="5dp"
                 android:layout_marginLeft="5dp"
                 android:layout_marginRight="5dp"
-                android:layout_marginTop="35dp"
+                android:layout_marginTop="5dp"
                 android:background="#ccc" />
 
             <LinearLayout
