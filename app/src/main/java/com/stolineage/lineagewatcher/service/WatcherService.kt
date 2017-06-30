@@ -201,7 +201,7 @@ class WatcherService : Service() {
             if (imageTransmogrifier?.orientation != getResources().getConfiguration().orientation) {
                 updateUI(false);
             } else {
-                val currentColor = bitmap?.getPixel((currentX / imageTransmogrifier?.scaleX!!).toInt(), (currentY / imageTransmogrifier?.scaleY!!).toInt());
+                val currentColor = bitmap?.getPixel((currentX / imageTransmogrifier?.scaleX!! + (10 * metrics.density) / 2).toInt(), (currentY / imageTransmogrifier?.scaleY!! + (10 * metrics.density) / 2).toInt());
                 if (color == null) {
                     color = currentColor
                 } else if (currentColor != color) {
