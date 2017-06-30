@@ -43,6 +43,11 @@ class MainActivity : AppCompatActivity() {
             Config.appKill = !Config.appKill
             updateUI();
         })
+
+        if (!Settings.canDrawOverlays(this)) {
+            val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + packageName))
+            startActivityForResult(intent, REQUEST_CODE_OVERLAY_PREMISSION_REQUEST)
+        }
     }
 
     override fun onResume() {
@@ -51,12 +56,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun init() {
-
-        if (!Settings.canDrawOverlays(this)) {
-            val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + packageName))
-            startActivityForResult(intent, REQUEST_CODE_OVERLAY_PREMISSION_REQUEST)
-        }
-
         if (projectionManager == null) {
             projectionManager = getSystemService(Context.MEDIA_PROJECTION_SERVICE) as? MediaProjectionManager
             startActivityForResult(projectionManager?.createScreenCaptureIntent(), REQUEST_CODE_CAPTURE_PREMISSION_REQUEST)
