@@ -15,13 +15,20 @@ import android.hardware.display.DisplayManager
 import android.os.*
 import android.content.pm.ApplicationInfo
 import android.app.ActivityManager
+import android.app.Instrumentation
 import android.content.pm.ConfigurationInfo
 import android.content.pm.PackageManager
 import android.content.res.Configuration
+import android.graphics.Color
+import android.test.TouchUtils
 import android.util.Log
 import android.view.*
 import com.stolineage.lineagewatcher.activity.AlarmActivity
 import com.stolineage.lineagewatcher.singleton.Config
+import java.io.BufferedInputStream
+import java.net.HttpURLConnection
+import java.net.URL
+import java.util.*
 
 class WatcherService : Service() {
     private var windowManager: WindowManager? = null;
@@ -185,6 +192,18 @@ class WatcherService : Service() {
         return windowManager
     }
 
+    fun isRed(color: Int): Boolean {
+        var red = Color.red(color)
+        var blue = Color.blue(color)
+        var green = Color.green(color)
+
+//        Log.d("-------", " red " + red + ", blue " + blue + ", green " + green)
+        return red > 90 && blue < 50 && green < 50;
+    }
+
+
+    var lastAt: Long = 0
+
     fun updateImage(bitmap: Bitmap?) {
         if (!watching) {
             return
@@ -204,14 +223,22 @@ class WatcherService : Service() {
                 val currentColor = bitmap?.getPixel((currentX / imageTransmogrifier?.scaleX!! + (10 * metrics.density) / 2).toInt(), (currentY / imageTransmogrifier?.scaleY!! + (10 * metrics.density) / 2).toInt());
                 if (color == null) {
                     color = currentColor
-                } else if (currentColor != color) {
-                    vibrator?.vibrate(5000)
-                    updateUI(false);
+                } else if (isRed(currentColor!!)) {
+                    if (lastAt + 5000 < Date().getTime()) {
+                        lastAt = Date().getTime()
 
-                    if (Config.appKill) {
-                        val intent = Intent(this, AlarmActivity::class.java)
-                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                        startActivity(intent)
+                        handler?.post({
+                            Log.d("-------","send call")
+                            val url = URL("http://192.168.0.8:8888/")
+                            val urlConnection = url.openConnection() as HttpURLConnection
+                            try {
+                                val in1 = BufferedInputStream(urlConnection.getInputStream())
+                                in1.read()
+                                in1.close()
+                            } finally {
+                                urlConnection.disconnect()
+                            }
+                        })
                     }
                 }
             }

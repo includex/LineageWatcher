@@ -78,7 +78,7 @@ class MainActivity : AppCompatActivity() {
         if (requestCode == REQUEST_CODE_CAPTURE_PREMISSION_REQUEST) {
             Config.mediaProjection = projectionManager?.getMediaProjection(resultCode, data);
             try {
-                startActivity(packageManager.getLaunchIntentForPackage(Config.LINEAGE_PACKAGE_NAME))
+//                startActivity(packageManager.getLaunchIntentForPackage(Config.LINEAGE_PACKAGE_NAME))
             } catch(e: Exception) {
                 Toast.makeText(this, R.string.toast_for_not_found_lineage, Toast.LENGTH_SHORT).show();
             }
