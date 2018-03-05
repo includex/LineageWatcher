@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">LineageWatcher</string>
+    <string name="display_overlay_ui">포커스 보이기</string>
+    <string name="hide_overlay_ui">포커스 제거</string>
+    <string name="start">start</string>
+    <string name="vibrator_with_kill_app">진동(5초) + 앱 종료</string>
+    <string name="vibrator">진동(5초)</string>
+    <string name="guide_title">사용법</string>
+    <string name="guide_body_01">위치를 조정하여 감시할 포션의 중앙에 위치시키십시오</string>
+    <string name="guide_body_02">중앙 하얀점을 눌러서 감시를 시작하십시오</string>
+    <string name="guide_body_03">해당 포인트의 색이 변하는 모든 동작이 구동조건입니다. 예) 직접클릭하여 물약먹기, 화면전환</string>
+    <string name="guide_body_04">어플리케이션은 화면 위 그리기권한(포커스표시를 위해), 화면캡쳐권한(전체화면을 받아 설정한 해당 1개의 점의 컬러값을 얻기위해)과 진동권한(진동알림을 위해), 패키지매니저권한(리니지m을 종료하기위해)을 요구합니다. 명시된 기능 외 동작은 하지 않습니다. 캡쳐 권한의 on/off 여부는 위와 같이 확인 할 수 있습니다. 구글마켓 외 다른 경로를 통해 설치시 위변조되었을 수 있으니 주의하세요.</string>
+    <string name="top_label">Lineage Watcher</string>
+    <string name="toast_for_not_found_lineage">리니지M 앱을 실행시키지 못했습니다</string>
+    <string name="copyright">Copyright(c)2017 Stolineage All rights reserved.</string>
+</resources>
