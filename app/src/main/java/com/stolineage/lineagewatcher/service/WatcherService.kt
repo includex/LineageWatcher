@@ -6,22 +6,16 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.PixelFormat
 import android.graphics.Rect
+import android.hardware.display.DisplayManager
 import android.hardware.display.VirtualDisplay
 import android.media.projection.MediaProjection
-import android.util.DisplayMetrics
-import com.stolineage.lineagewatcher.R
-import com.stolineage.lineagewatcher.utils.ImageTransmogrifier
-import android.hardware.display.DisplayManager
 import android.os.*
-import android.content.pm.ApplicationInfo
-import android.app.ActivityManager
-import android.content.pm.ConfigurationInfo
-import android.content.pm.PackageManager
-import android.content.res.Configuration
-import android.util.Log
+import android.util.DisplayMetrics
 import android.view.*
+import com.stolineage.lineagewatcher.R
 import com.stolineage.lineagewatcher.activity.AlarmActivity
 import com.stolineage.lineagewatcher.singleton.Config
+import com.stolineage.lineagewatcher.utils.ImageTransmogrifier
 
 class WatcherService : Service() {
     private var windowManager: WindowManager? = null;
@@ -40,8 +34,6 @@ class WatcherService : Service() {
     private val DISPLAY_NAME: String = "capture"
     private val handlerThread = HandlerThread(javaClass.simpleName, android.os.Process.THREAD_PRIORITY_BACKGROUND)
     private var handler: Handler? = null
-    //private var scaleX: Float = 0f
-    //private var scaleY: Float = 0f
     private var color: Int? = null
     private var vibrator: Vibrator? = null
     private var defaultDisplay: Display? = null
@@ -63,7 +55,7 @@ class WatcherService : Service() {
         installView()
 
         handlerThread.start();
-        handler = Handler(handlerThread.getLooper());
+        handler = Handler(handlerThread.looper);
 
         vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
     }
@@ -76,30 +68,30 @@ class WatcherService : Service() {
 
     private fun installView() {
         uiView = getUIView();
-        roundButton = uiView?.findViewById(R.id.v_round);
+        roundButton = uiView?.findViewById(R.id.v_round)
         ivMover = uiView?.findViewById(R.id.iv_mover)
 
-        roundButton?.setOnClickListener({
+        roundButton?.setOnClickListener {
             updateUI(!watching);
 
-            if (watching == true) {
-                color = null;
+            if (watching) {
+                color = null
 
                 if (virtualDisplay != null) {
-                    virtualDisplay?.release();
-                    virtualDisplay = null;
+                    virtualDisplay?.release()
+                    virtualDisplay = null
                 }
 
-                imageTransmogrifier = ImageTransmogrifier(this);
+                imageTransmogrifier = ImageTransmogrifier(this)
                 virtualDisplay = Config.mediaProjection?.createVirtualDisplay(DISPLAY_NAME,
                         imageTransmogrifier?.getWidth()!!, imageTransmogrifier?.getHeight()!!,
-                        getResources().getDisplayMetrics().densityDpi,
+                        resources.displayMetrics.densityDpi,
                         DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY or DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC, imageTransmogrifier?.surface, null, handler);
 
                 Config.mediaProjection?.registerCallback(CallBack(virtualDisplay), handler)
 
             }
-        })
+        }
         bindDragEvent(uiView)
 
         params.height = (43 * metrics.density).toInt()
@@ -131,7 +123,7 @@ class WatcherService : Service() {
                     params.y = viewY + offsetY.toInt()
 
                     var rect: Rect? = Rect()
-                    var array: IntArray = IntArray(4);
+                    var array: IntArray = IntArray(2)
                     roundButton?.getLocationOnScreen(array)
                     currentX = array[0];
                     currentY = array[1];
@@ -146,8 +138,7 @@ class WatcherService : Service() {
 
     private fun getUIView(): View? {
         val layoutInflater = getSystemService(Context.LAYOUT_INFLATER_SERVICE) as? LayoutInflater;
-        val view = layoutInflater?.inflate(R.layout.overlay_view, null)
-        return view
+        return layoutInflater?.inflate(R.layout.overlay_view, null)
     }
 
     override fun onDestroy() {
@@ -167,13 +158,9 @@ class WatcherService : Service() {
         return null;
     }
 
-    class CallBack : MediaProjection.Callback {
+    class CallBack(virtualDisplay: VirtualDisplay?) : MediaProjection.Callback() {
 
-        private var display: VirtualDisplay?
-
-        constructor(virtualDisplay: VirtualDisplay?) {
-            display = virtualDisplay
-        }
+        private var display: VirtualDisplay? = virtualDisplay
 
         override fun onStop() {
             display?.release()
@@ -194,19 +181,19 @@ class WatcherService : Service() {
             return;
         }
 
-        Handler(Looper.getMainLooper()).post({
+        Handler(Looper.getMainLooper()).post {
             var x: Int? = null
             var y: Int? = null
 
-            if (imageTransmogrifier?.orientation != getResources().getConfiguration().orientation) {
-                updateUI(false);
+            if (imageTransmogrifier?.orientation != resources.configuration.orientation) {
+                updateUI(false)
             } else {
-                val currentColor = bitmap?.getPixel((currentX / imageTransmogrifier?.scaleX!! + (10 * metrics.density) / 2).toInt(), (currentY / imageTransmogrifier?.scaleY!! + (10 * metrics.density) / 2).toInt());
+                val currentColor = bitmap?.getPixel((currentX / imageTransmogrifier?.scaleX!! + (10 * metrics.density) / 2).toInt(), (currentY / imageTransmogrifier?.scaleY!! + (10 * metrics.density) / 2).toInt())
                 if (color == null) {
                     color = currentColor
                 } else if (currentColor != color) {
                     vibrator?.vibrate(5000)
-                    updateUI(false);
+                    updateUI(false)
 
                     if (Config.appKill) {
                         val intent = Intent(this, AlarmActivity::class.java)
@@ -215,7 +202,7 @@ class WatcherService : Service() {
                     }
                 }
             }
-        })
+        }
     }
 
     fun getHandler(): Handler? {

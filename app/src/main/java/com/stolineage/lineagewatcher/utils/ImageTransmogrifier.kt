@@ -3,26 +3,22 @@ package com.stolineage.lineagewatcher.utils
 import android.graphics.Bitmap
 import android.graphics.PixelFormat
 import android.graphics.Point
-import android.media.Image
 import android.media.ImageReader
-import android.view.Display
 import android.view.Surface
 import com.stolineage.lineagewatcher.service.WatcherService
-import java.io.ByteArrayOutputStream
-import java.nio.ByteBuffer
 
 class ImageTransmogrifier internal constructor(private val svc: WatcherService) : ImageReader.OnImageAvailableListener {
     private val width: Int
     private val height: Int
     private val imageReader: ImageReader
     private var latestBitmap: Bitmap? = null
-    public var orientation: Int
-    public var scaleX: Float
-    public var scaleY: Float
+    var orientation: Int
+    var scaleX: Float
+    var scaleY: Float
 
     init {
 
-        val display = svc.getWindowManager()?.getDefaultDisplay()
+        val display = svc.getWindowManager()?.defaultDisplay
         val size = Point()
 
         display?.getSize(size)
@@ -40,7 +36,7 @@ class ImageTransmogrifier internal constructor(private val svc: WatcherService) 
         this.scaleX = size.x / width.toFloat()
         this.scaleY = size.y / height.toFloat()
 
-        this.orientation = svc.resources.configuration.orientation;
+        this.orientation = svc.resources.configuration.orientation
 
         imageReader = ImageReader.newInstance(width, height, PixelFormat.RGBA_8888, 2)
         imageReader.setOnImageAvailableListener(this, svc.getHandler())
@@ -70,24 +66,24 @@ class ImageTransmogrifier internal constructor(private val svc: WatcherService) 
 
             latestBitmap!!.copyPixelsFromBuffer(buffer)
 
-            image?.close()
+            image.close()
 
             svc.updateImage(latestBitmap)
         }
     }
 
-    public val surface: Surface
+    val surface: Surface
         get() = imageReader.surface
 
-    public fun getWidth(): Int {
+    fun getWidth(): Int {
         return width
     }
 
-    public fun getHeight(): Int {
+    fun getHeight(): Int {
         return height
     }
 
-    public fun close() {
+    fun close() {
         imageReader.close()
     }
 }
